@@ -9,13 +9,13 @@ Swap student seat assignments in batch so that students from the same group move
 * File `input/seats.json`: List of seats that are available for swapping. These
   seats may be the seats that have been assigned initially to the students in
   `input/students.json`.
-* File `input/students_facs.json`: List of student-faculty pairs.
+* File `input/students_fac.json`: List of student-faculty pairs.
 * File `input/participate.txt`: List of faculty members who voluntarily
   participate in batch-swapping the seats for their students.
 
 ## Algorithm
 
-Random hill-climbing
+Random hill-climbing.
 
 ## Outputs
 
