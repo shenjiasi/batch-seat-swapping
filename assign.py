@@ -42,19 +42,37 @@ def shuffle_students(students, n_seats):
     assert(len(students) == n_seats)
     return students
 
-def assign_seats(students, seats_filename):
-    seats = seatmap.load_seats(seats_filename)
-    random.shuffle(seats)
-    print(len(seats), seats)
+def construct_initial_seat_assignment(students, assigned_seats, seats_filename):
+    all_seats = seatmap.load_seats(seats_filename)
 
-    chosen_students = shuffle_students(students, len(seats))
-    print(len(chosen_students), chosen_students)
-    assert(len(chosen_students) == len(seats))
+    # Sanity check
+    print(len(all_seats), all_seats)
+    print(len(assigned_seats), assigned_seats)
+    assert(len(assigned_seats) <= len(all_seats))
+    for s1 in assigned_seats:
+        found = False
+        for s2 in all_seats:
+            if s1 == s2.label:
+                found = True
+        assert(found)
+    assert(len(assigned_seats) == len(students))
 
     assignments = []
-    for (seat, chosen_student) in zip(seats, chosen_students):
-        assignments.append(seatmap.Assignment(seat, chosen_student))
-    return assignments, chosen_students
+    for s2 in all_seats:
+        chosen_student = None
+        for i1, s1 in enumerate(assigned_seats):
+            if s1 == s2.label:
+                chosen_student = students[i1]
+        assignments.append(seatmap.Assignment(s2, chosen_student))
+
+    # Sanity check
+    n_stu = 0
+    for a in assignments:
+        if a.student is not None:
+            n_stu += 1
+    assert(n_stu == len(students))
+
+    return assignments
 
 
 
@@ -147,8 +165,8 @@ def print_summaries(summary_init, summary_opt):
 
 
 def assign_multiple_times(n_times):
-    students, professors, profs_participate = people.load_inputs()
-    initial, chosen_students = assign_seats(students, 'input/seats.json')
+    students, assigned_seats, professors, profs_participate = people.load_inputs()
+    initial = construct_initial_seat_assignment(students, assigned_seats, 'input/seats.json')
 
     m = seatmap.SeatMap(initial)
     #print(m)

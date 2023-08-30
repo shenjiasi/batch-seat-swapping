@@ -28,6 +28,7 @@ class Room(object):
 
 class Seat(object):
     def __init__(self, label):
+        label = label.lower()
         self.label = label
         assert('-' in label)
         parts = label.split('-')
