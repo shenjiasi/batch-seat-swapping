@@ -1,17 +1,21 @@
 # Batch Seat Swapping
 
-Swap student seat assignments in batch so that students from the same group move closer.
+Swap student seat assignments in batch so that students who share the same
+primary supervisor move closer.
 
 ## Inputs
 
-* File `input/students.json`: List of students who (1) have been assigned fixed
-  seats in the RPG hubs and (2) consent to participate in batch swapping.
-* File `input/seats.json`: List of seats that are available for swapping. These
-  seats may be the seats that have been assigned initially to the students in
-  `input/students.json`.
-* File `input/students_fac.json`: List of student-faculty pairs.
-* File `input/participate.txt`: List of faculty members who voluntarily
-  participate in batch-swapping the seats for their students.
+* **File `input/students_seats.json`:** List of student-seat pairs assigned by the
+  initial RPG Lab seat application process.
+* **File `input/seats.json`:** List of all RPG Lab seats that are available to CSE.
+  These seats contain both occupied ones (i.e., those that have been assigned
+  in `input/students_seats.json`) and empty seats (i.e., those that have not been
+  assigned to any student).
+* **File `input/students_fac.json`:** List of student-faculty pairs. For students
+  that are co-supervised by multiple faculty members, their corresponding faculty
+  members in this file are their primary supervisors.
+* **File `input/participate.txt`:** List of faculty members who voluntarily
+  participate in batch-swapping the seats for all of their own students.
 
 ## Algorithm
 

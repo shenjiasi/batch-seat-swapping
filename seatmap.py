@@ -2,12 +2,14 @@ import json
 
 class Room(object):
     def __init__(self, room):
-        self.label = room
         assert(isinstance(room, str))
+        room = room.lower()
+        self.label = room
         sign = 1
         if room.startswith('lg'):
             sign = -1
             room = room[2:]
+            assert(room.isnumeric())
         if not room.isnumeric():
             assert(room.endswith('a')) # XXX
             room = room[:-1] # XXX
