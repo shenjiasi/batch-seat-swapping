@@ -183,6 +183,7 @@ def assign_multiple_times(n_times):
     m.dump_json('output/optimized.json')
     m.dump_csv('output/optimized')
     m.dump_html('output/optimized.html')
+    m.dump_json_cleaned_sorted('output/swapped.json')
 
     res_init = calculate_cost(stus_participate, professors, initial)
     res_opt = calculate_cost(stus_participate, professors, optimized)

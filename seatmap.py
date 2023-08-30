@@ -100,6 +100,14 @@ class SeatMap(object):
     def dump_json(self, filename):
         with open(filename, 'w') as f:
             f.write(self.to_json() + '\n')
+    def dump_json_cleaned_sorted(self, filename):
+        clean = []
+        for a in self.assignments:
+            if a.student is not None:
+                clean.append('"%s,%s"' % (a.student.sid, a.seat.label))
+        clean = sorted(clean)
+        with open(filename, 'w') as f:
+            f.write('[%s]\n' % ','.join(clean))
     def to_csv(self, room_label):
         s = 'desk,student\n'
         desks = self.rooms2d[room_label]
@@ -108,10 +116,13 @@ class SeatMap(object):
         for d in range(indices[0], indices[-1]+1):
             s += str(d) + ','
             if d in desks:
-                s += str(desks[d]) + '\n'
+                if desks[d] is not None:
+                    s += str(desks[d]) + '\n'
+                else:
+                    s += 'Empty\n' # Available but not assigned to anyone
                 count += 1
             else:
-                s += 'N/A\n'
+                s += 'Unavailable\n' # Not available in seats.json
         assert(count == len(desks))
         return s
     def dump_csv(self, filename_prefix):

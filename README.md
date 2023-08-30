@@ -38,22 +38,20 @@ python3 assign.py
 
 The most important output file is this one:
 
-* **File `output/optimized.json`**: List of updated seat-student pairs after
+* **File `output/swapped.json`**: List of updated student-seat pairs after
   batch swapping.
 
 Please load this file into CSSystem. 
 
-Other output files are for debugging and illustration purposes only. Please
-feel free to disregard them:
+Please disregard other files under the `output/` directory, as they are
+generated for debugging and illustration purposes only:
 
-* File `output/optimized.html`: A visual representation of the updated
-  seat-student pairs.
-
-* File `output/initial.json`: List of initial seat-student pairs before
-  batch swapping.
-
-* File `output/initial.html`: A visual representation of the initial
-  seat-student pairs.
+* File `output/optimized.html`: Visual representation of updated seat-student
+  pairs.
+* File `output/optimized.json`: List of updated seat-student pairs.
+* File `output/initial.html`: Visual representation of initial seat-student
+  pairs.
+* File `output/initial.json`: List of initial seat-student pairs.
 
 
 ## Additional Information
