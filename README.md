@@ -1,7 +1,7 @@
 # Batch Seat Swapping
 
 The batch seat swapping algorithm applies to students who have been assigned a
-seat in the CSE RPg Labs and whose primary supervisors participate in the
+seat in the CSE RPg Labs and voluntarily participate in the
 scheme.  The algorithm searches for improved seat arrangements among
 participating students so that those who share the same primary supervisor
 move closer.
@@ -22,8 +22,9 @@ file names:
 * **File `input/students_fac.json`:** List of student-faculty pairs. For students
   that are co-supervised by multiple faculty members, their corresponding faculty
   members in this file are their primary supervisors.
-* **File `input/participate.txt`:** List of faculty members who voluntarily
-  sign up to batch-swap the seats for all of their own students.
+* **File `input/participate.txt`:** List of students who sign up for batch
+  swapping. (Students who sign up but don't currently have an assigned seat
+  will be disregarded in the swapping.)
 
 We have included a set of sample input files for illustration and testing
 purposes.  Please replace them with authentic data.

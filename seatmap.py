@@ -103,7 +103,7 @@ class SeatMap(object):
     def dump_json_cleaned_sorted(self, filename):
         clean = []
         for a in self.assignments:
-            if a.student is not None:
+            if a.student is not None and a.student.participate():
                 clean.append('"%s,%s"' % (a.student.sid, a.seat.label))
         clean = sorted(clean)
         with open(filename, 'w') as f:

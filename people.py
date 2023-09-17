@@ -7,10 +7,15 @@ class Student(object):
         self.sid = sid
         self.prof = prof
     def __str__(self):
+        if not self.participate():
+            return 'Opt Out'
         return '%s@%s' % (self.sid, self.prof)
     def __repr__(self):
         return self.__str__()
+    def participate(self):
+        return self != NON_PARTICIPANT
 
+NON_PARTICIPANT = Student('.', '.')
 
 
 def get_each_student_one_faculty(stu_fac):
@@ -41,21 +46,38 @@ def check_no_duplicates(l):
             ok = False
     return ok
 
-def load_students(stu_seat_filename, stu_fac_filename):
+def load_students(stu_seat_filename, stu_fac_filename, sids_participate):
     with open(stu_seat_filename, 'r') as f:
         sids = json.load(f)
         #print(len(sids), sids)
-    stus_with_seats = [s.split(',')[0] for s in sids]
-    assigned_seats = [s.split(',')[1] for s in sids]
+
+    stus_with_seats = []
+    assigned_seats = []
+    dont_touch_seats = []
+    for s in sids:
+        sid = s.split(',')[0]
+        seat = s.split(',')[1]
+        if sid in sids_participate: # Filter by participants
+            stus_with_seats.append(sid)
+            assigned_seats.append(seat) # Seats of participants
+        else:
+            dont_touch_seats.append(seat) # Seats of non-participants
+
     #print(len(stus_with_seats), stus_with_seats)
     #print(len(assigned_seats), assigned_seats)
     assert(check_no_duplicates(stus_with_seats)) # No doubly-assigned students
     assert(check_no_duplicates(assigned_seats)) # No doubly-assigned seats
+    assert(check_no_duplicates(dont_touch_seats)) # No doubly-assigned seats
 
     stus_with_seats = sorted(list(set(stus_with_seats)))
     assigned_seats = sorted(list(set(assigned_seats)))
-    assert(len(stus_with_seats) == len(sids)) # No doubly-assigned students
-    assert(len(assigned_seats) == len(sids)) # No doubly-assigned seats
+
+    # Sanity checks
+    for s1 in stus_with_seats:
+        assert(s1 in sids_participate) # Filter by participants
+    assert(len(stus_with_seats) <= len(sids_participate))
+    assert(len(assigned_seats) <= len(sids_participate))
+    assert(len(assigned_seats) + len(dont_touch_seats) == len(sids))
 
     with open(stu_fac_filename, 'r') as f:
         stu_fac = [s.split(',') for s in json.load(f)]
@@ -64,15 +86,15 @@ def load_students(stu_seat_filename, stu_fac_filename):
     students = [Student(s, stu_fac_map[s]) for s in stus_with_seats]
     assert(len(students) == len(stus_with_seats))
     print(len(students), students)
-    return students, assigned_seats, all_facs
+    return students, assigned_seats, dont_touch_seats, all_facs
 
-def load_profs_participate(filename):
+def load_sids_participate(filename):
     with open(filename, 'r') as f:
-        profs = f.read().strip().split('\n')
-    profs = sorted([p for p in profs if len(p) > 0])
-    print('Participate:', len(profs), str(profs))
-    assert(len(profs) > 1)
-    return profs
+        sids = f.read().strip().split('\n')
+    sids = sorted([s for s in sids if len(s) > 0])
+    print('Participate:', len(sids), str(sids))
+    assert(len(sids) > 1)
+    return sids
 
 
 def split_by_profs(students, professors):
@@ -188,9 +210,9 @@ def rename_student_profs_by_subgroups(students, sub_professors):
     return renamed_students, renamed_sub_professors
 
 
-
 def load_inputs():
-    students, assigned_seats, professors = load_students('input/students_seats.json', 'input/students_fac.json')
+    sids_participate = load_sids_participate('input/participate.txt')
+    students, assigned_seats, dont_touch_seats, professors = \
+            load_students('input/students_seats.json', 'input/students_fac.json', sids_participate)
     students, professors = split_profs_into_subgroups(students, professors)
-    profs_participate = load_profs_participate('input/participate.txt')
-    return students, assigned_seats, professors, profs_participate
+    return students, assigned_seats, dont_touch_seats, professors

@@ -5,31 +5,32 @@ import copy
 import seatmap
 import people
 
-def the_seat_participates(a, profs_participate):
+def the_seat_participates(a, students):
     if a.student is None:
         return True
-    found = False
-    for p in profs_participate:
-        if a.student.prof.startswith(p + '-') and len(a.student.prof) == len(p) + 2:
-            found = True
-            #print(p, a.student.prof)
-    return found
+    for s in students:
+        if a.student.sid == s.sid:
+            return True
+    return False
 
-def split_by_prof_participation(assignments, profs_participate):
+def split_by_stu_participation(assignments, students):
     stay = []
     swap = []
-    stus_participate = []
+    swap_not_none = 0
     for a in assignments:
-        if the_seat_participates(a, profs_participate):
+        if the_seat_participates(a, students):
             swap.append(a)
-            stus_participate.append(a.student)
+            if a.student is not None:
+                swap_not_none += 1
         else:
             stay.append(a)
     assert(len(stay) + len(swap) == len(assignments))
     print('Stay:', len(stay), stay)
     print('Swap:', len(swap), swap)
     assert(len(swap) > 1)
-    return stay, swap, stus_participate
+    assert(len(swap) >= len(students))
+    assert(swap_not_none == len(students))
+    return stay, swap
 
 
 def shuffle_students(students, n_seats):
@@ -42,14 +43,15 @@ def shuffle_students(students, n_seats):
     assert(len(students) == n_seats)
     return students
 
-def construct_initial_seat_assignment(students, assigned_seats, seats_filename):
+def construct_initial_seat_assignment(students, assigned_seats, dont_touch_seats, seats_filename):
     all_seats = seatmap.load_seats(seats_filename)
 
     # Sanity check
-    print(len(all_seats), all_seats)
-    print(len(assigned_seats), assigned_seats)
+    print('All seats: ', len(all_seats), all_seats)
+    print('Assigned seats: ', len(assigned_seats), assigned_seats)
     assert(len(assigned_seats) <= len(all_seats))
-    for s1 in assigned_seats:
+    assert(len(assigned_seats) + len(dont_touch_seats) <= len(all_seats))
+    for s1 in assigned_seats + dont_touch_seats:
         found = False
         for s2 in all_seats:
             if s1 == s2.label:
@@ -63,6 +65,10 @@ def construct_initial_seat_assignment(students, assigned_seats, seats_filename):
         for i1, s1 in enumerate(assigned_seats):
             if s1 == s2.label:
                 chosen_student = students[i1]
+        for s1 in dont_touch_seats:
+            if s1 == s2.label:
+                assert(chosen_student is None)
+                chosen_student = people.NON_PARTICIPANT
         assignments.append(seatmap.Assignment(s2, chosen_student))
 
     # Sanity check
@@ -70,7 +76,7 @@ def construct_initial_seat_assignment(students, assigned_seats, seats_filename):
     for a in assignments:
         if a.student is not None:
             n_stu += 1
-    assert(n_stu == len(students))
+    assert(n_stu == len(students) + len(dont_touch_seats)) # Participants + "someone else"
 
     return assignments
 
@@ -165,8 +171,8 @@ def print_summaries(summary_init, summary_opt):
 
 
 def assign_multiple_times(n_times):
-    students, assigned_seats, professors, profs_participate = people.load_inputs()
-    initial = construct_initial_seat_assignment(students, assigned_seats, 'input/seats.json')
+    students, assigned_seats, dont_touch_seats, professors = people.load_inputs()
+    initial = construct_initial_seat_assignment(students, assigned_seats, dont_touch_seats, 'input/seats.json')
 
     m = seatmap.SeatMap(initial)
     #print(m)
@@ -174,8 +180,8 @@ def assign_multiple_times(n_times):
     m.dump_csv('output/initial')
     m.dump_html('output/initial.html')
 
-    initial_stay, initial_swap, stus_participate = split_by_prof_participation(initial, profs_participate)
-    optimized_swap = improve_seats_multiple_times(stus_participate, professors, initial_swap, n_times)
+    initial_stay, initial_swap = split_by_stu_participation(initial, students)
+    optimized_swap = improve_seats_multiple_times(students, professors, initial_swap, n_times)
     optimized = initial_stay + optimized_swap
 
     m = seatmap.SeatMap(optimized)
@@ -185,8 +191,8 @@ def assign_multiple_times(n_times):
     m.dump_html('output/optimized.html')
     m.dump_json_cleaned_sorted('output/swapped.json')
 
-    res_init = calculate_cost(stus_participate, professors, initial)
-    res_opt = calculate_cost(stus_participate, professors, optimized)
+    res_init = calculate_cost(students, professors, initial)
+    res_opt = calculate_cost(students, professors, optimized)
     print('\nAfter trying to swap %d times, average distance drops from %.02f to %.02f'
           % (n_times, res_init[0], res_opt[0]))
     print_summaries(res_init[1], res_opt[1])
